@@ -1,0 +1,22 @@
+# Meson & Ninja build directories
+builddir/
+build/
+.mesonpy/
+
+# Compiled objects & libraries
+*.o
+*.so
+*.p/
+
+# IDE & Editor files
+.vscode/
+.idea/
+.clangd/
+.cache/
+*~
+*.swp
+
+# System logs & test outputs
+*.log
+tmp.md
+tmp_extras.md

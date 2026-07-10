@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <action id="org.containers.bootc.upgrade">
+    <description>Update the system</description>
+    <message>Authentication is required to update the system</message>
+
+    <description xml:lang="zh_CN">更新系统底座</description>
+    <message xml:lang="zh_CN">系统需要授权以安全更新您的系统底座</message>
+
+    <description xml:lang="zh_TW">更新系統底座</description>
+    <message xml:lang="zh_TW">系統需要授權以安全更新您的系統底座</message>
+
+    <description xml:lang="de">System aktualisieren</description>
+    <message xml:lang="de">Authentifizierung ist erforderlich, um das System zu aktualisieren</message>
+
+    <description xml:lang="es">Actualizar el sistema</description>
+    <message xml:lang="es">Se requiere autenticación para actualizar el sistema</message>
+
+    <description xml:lang="fr">Mettre à jour le système</description>
+    <message xml:lang="fr">Authentification requise pour mettre à jour le système</message>
+
+    <description xml:lang="it">Aggiorna il sistema</description>
+    <message xml:lang="it">È richiesta l'autenticazione per aggiornare il sistema</message>
+
+    <description xml:lang="ja">システムの更新</description>
+    <message xml:lang="ja">システムを更新するには認証が必要です</message>
+
+    <description xml:lang="ko">시스템 업데이트</description>
+    <message xml:lang="ko">시스템을 업데이트하려면 인증이 필요합니다</message>
+
+    <description xml:lang="pt_BR">Atualizar o sistema</description>
+    <message xml:lang="pt_BR">Autenticação é necessária para atualizar o sistema</message>
+
+    <description xml:lang="ru">Обновление системы</description>
+    <message xml:lang="ru">Для обновления системы требуется аутентификация</message>
+
+    <description xml:lang="pl">Aktualizuj system</description>
+    <message xml:lang="pl">Wymagane jest uwierzytelnienie, aby zaktualizować system</message>
+
+    <description xml:lang="uk">Оновлення системи</description>
+    <message xml:lang="uk">Для оновлення системи потрібна автентифікація</message>
+
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/gs-bootc-helper</annotate>
+  </action>
+</policyconfig>

@@ -1,0 +1,13 @@
+// Allow active users in the 'wheel' group to execute 'bootc status' 
+// and 'bootc upgrade --check' without authentication.
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/usr/bin/bootc") {
+        var commandLine = action.lookup("command_line");
+        if (commandLine && (commandLine.indexOf("--check") !== -1 || commandLine.indexOf("status") !== -1)) {
+            if (subject.isInGroup("wheel") && subject.active) {
+                return polkit.Result.YES;
+            }
+        }
+    }
+});
