@@ -249,7 +249,14 @@ gs_plugin_bootc_setup_async (GsPlugin            *plugin,
 	g_autoptr(GError) os_err = NULL;
 	g_autoptr(GsOsRelease) os_release = gs_os_release_new (&os_err);
 	if (os_release != NULL) {
-		self->os_name = g_strdup (gs_os_release_get_pretty_name (os_release));
+		g_autofree gchar *os_id_name = g_get_os_info (G_OS_INFO_KEY_NAME);
+		g_autofree gchar *os_variant = g_get_os_info ("VARIANT");
+		if (os_id_name != NULL && os_variant != NULL && *os_variant != '\0')
+			self->os_name = g_strdup_printf ("%s (%s)", os_id_name, os_variant);
+		else if (os_id_name != NULL)
+			self->os_name = g_strdup (os_id_name);
+		else
+			self->os_name = g_strdup (gs_os_release_get_pretty_name (os_release));
 		self->os_logo = g_strdup (gs_os_release_get_logo (os_release));
 	} else {
 		self->os_name = g_strdup ("Atomic Operating System");
