@@ -33,6 +33,7 @@ struct _GsPluginBootc {
 	gchar *os_name;
 	gchar *os_logo;
 	gchar *booted_digest;  /* 12-character digest of the booted image */
+	gchar *booted_version; /* Version string reported by bootc for the booted image *
 	gboolean is_composefs; /* True if using the pure ComposeFS backend */
 };
 
@@ -60,6 +61,7 @@ gs_plugin_bootc_init (GsPluginBootc *self)
 	self->os_name = NULL;
 	self->os_logo = NULL;
 	self->booted_digest = NULL;
+	self->booted_version = NULL;
 	self->is_composefs = FALSE;
 }
 
@@ -71,6 +73,7 @@ gs_plugin_bootc_dispose (GObject *object)
 	g_clear_pointer (&self->os_name, g_free);
 	g_clear_pointer (&self->os_logo, g_free);
 	g_clear_pointer (&self->booted_digest, g_free);
+	g_clear_pointer (&self->booted_version, g_free);  // <-- NOVA
 	G_OBJECT_CLASS (gs_plugin_bootc_parent_class)->dispose (object);
 }
 
@@ -116,7 +119,7 @@ ensure_os_app_created (GsPluginBootc *self)
 	gs_app_set_description (self->os_app, GS_APP_QUALITY_NORMAL, "Container-native atomic host update.");
 	
 	/* Use the image digest as the version to prevent "unknown" state in UI */
-	gs_app_set_version (self->os_app, self->booted_digest ? self->booted_digest : "unknown");
+	gs_app_set_version (self->os_app, self->booted_version ? self->booted_version : "unknown");
 	
 	if (self->os_logo != NULL) {
 		g_autoptr(GIcon) ic = g_themed_icon_new (self->os_logo);
@@ -128,6 +131,23 @@ ensure_os_app_created (GsPluginBootc *self)
 	gs_app_set_state (self->os_app, GS_APP_STATE_INSTALLED);
 	gs_app_set_management_plugin (self->os_app, GS_PLUGIN (self));
 }
+
+static gchar *
+get_entry_version (JsonObject *entry_obj)
+{
+	JsonNode *img_node = json_object_get_member (entry_obj, "image");
+	if (img_node == NULL || !JSON_NODE_HOLDS_OBJECT (img_node))
+		return NULL;
+
+	JsonNode *ver_node = json_object_get_member (json_node_get_object (img_node), "version");
+	if (ver_node == NULL || !JSON_NODE_HOLDS_VALUE (ver_node) ||
+	    json_node_get_value_type (ver_node) != G_TYPE_STRING)
+		return NULL;
+
+	const gchar *ver = json_node_get_string (ver_node);
+	return (ver != NULL && *ver != '\0') ? g_strdup (ver) : NULL;
+}
+
 
 static void
 parse_bootc_status_json (GsPluginBootc *self, const gchar *json_data)
@@ -160,8 +180,8 @@ parse_bootc_status_json (GsPluginBootc *self, const gchar *json_data)
 				const gchar *digest = json_object_get_string_member (img_outer, "imageDigest");
 				if (digest && *digest) {
 					const gchar *raw_digest = g_str_has_prefix (digest, "sha256:") ? digest + 7 : digest;
-					g_clear_pointer (&self->booted_digest, g_free);
-					self->booted_digest = g_strndup (raw_digest, 12);
+					g_clear_pointer (&self->booted_version, g_free);
+					self->booted_version = get_entry_version (booted_obj);
 				}
 			}
 		}
@@ -178,9 +198,12 @@ parse_bootc_status_json (GsPluginBootc *self, const gchar *json_data)
 	if (has_staged) {
 		gs_app_set_state (self->os_app, GS_APP_STATE_PENDING_INSTALL);
 		gs_app_add_quirk (self->os_app, GS_APP_QUIRK_NEEDS_REBOOT);
-		gs_app_set_update_version (self->os_app, "latest");
+		g_autofree gchar *staged_version = NULL;
+		if (JSON_NODE_HOLDS_OBJECT (staged_node))
+			staged_version = get_entry_version (json_node_get_object (staged_node));
+		gs_app_set_update_version (self->os_app, staged_version ? staged_version : "latest");
 	} else if (self->update_available) {
-		gs_app_set_state (self->os_app, GS_APP_STATE_UPDATABLE_LIVE);
+		gs_app_set_state (self->os_app, GS_APP_STATE_UPDATABLE);
 		gs_app_remove_quirk (self->os_app, GS_APP_QUIRK_NEEDS_REBOOT);
 	} else {
 		gs_app_set_state (self->os_app, GS_APP_STATE_INSTALLED);
@@ -301,7 +324,9 @@ gs_plugin_bootc_list_apps_async (GsPlugin *plugin, GsAppQuery *query, GsPluginLi
 		GsAppState state = gs_app_get_state (self->os_app);
 
 		if (is_for_update == GS_APP_QUERY_TRISTATE_TRUE) {
-			if (state != GS_APP_STATE_UPDATABLE_LIVE && state != GS_APP_STATE_PENDING_INSTALL) {
+			if (state != GS_APP_STATE_UPDATABLE &&
+			    state != GS_APP_STATE_UPDATABLE_LIVE &&
+			    state != GS_APP_STATE_PENDING_INSTALL) {
 				should_add = FALSE;
 			}
 		}
@@ -348,7 +373,19 @@ check_communicate_cb (GObject *source_object, GAsyncResult *res, gpointer user_d
 				if (g_str_has_prefix (digest_val, "sha256:")) {
 					digest_val += 7;
 				}
-				new_version = g_strndup (digest_val, 12);
+				gchar *version_line = g_strstr_len (stdout_buf, -1, "Version:");
+				if (version_line != NULL) {
+					gchar *version_val = version_line + 8;
+					while (*version_val == ' ' || *version_val == '\t') version_val++;
+					g_autofree gchar *version_str = g_strdup (version_val);
+					gchar *nl = strchr (version_str, '\n');
+					if (nl) *nl = '\0';
+					g_strstrip (version_str);
+					if (*version_str != '\0') {
+					g_clear_pointer (&new_version, g_free);
+						new_version = g_steal_pointer (&version_str);
+					}
+				}
 			}
 
 			gchar *added_line = g_strstr_len (stdout_buf, -1, "Added layers:");
@@ -371,7 +408,8 @@ check_communicate_cb (GObject *source_object, GAsyncResult *res, gpointer user_d
 
 	if (self->os_app != NULL) {
 		if (self->update_available && gs_app_get_state (self->os_app) != GS_APP_STATE_PENDING_INSTALL) {
-			gs_app_set_state (self->os_app, GS_APP_STATE_UPDATABLE_LIVE);
+			gs_app_set_state (self->os_app, GS_APP_STATE_UPDATABLE);
+			gs_app_add_quirk (self->os_app, GS_APP_QUIRK_NEEDS_REBOOT);
 			gs_app_set_update_version (self->os_app, new_version ? new_version : "latest");
 			gs_app_set_size_download (self->os_app, GS_SIZE_TYPE_VALID, download_size);
 		} else if (!self->update_available && gs_app_get_state (self->os_app) != GS_APP_STATE_PENDING_INSTALL) {
@@ -505,11 +543,11 @@ upgrade_wait_cb (GObject *source_object, GAsyncResult *res, gpointer user_data)
 		g_task_return_boolean (task, TRUE);
 	} else {
 		if (g_cancellable_is_cancelled (g_task_get_cancellable (task))) {
-			gs_app_set_state (task_data->app, GS_APP_STATE_UPDATABLE_LIVE);
+			gs_app_set_state (task_data->app, GS_APP_STATE_UPDATABLE);
 			gs_app_set_progress (task_data->app, GS_APP_PROGRESS_UNKNOWN);
 			g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED, "Update was manually cancelled.");
 		} else {
-			gs_app_set_state (task_data->app, GS_APP_STATE_UPDATABLE_LIVE);
+			gs_app_set_state (task_data->app, GS_APP_STATE_UPDATABLE);
 			gs_app_set_progress (task_data->app, GS_APP_PROGRESS_UNKNOWN);
 			g_task_return_new_error (task, GS_PLUGIN_ERROR, GS_PLUGIN_ERROR_FAILED, "bootc upgrade failed.");
 		}
