@@ -33,7 +33,7 @@ struct _GsPluginBootc {
 	gchar *os_name;
 	gchar *os_logo;
 	gchar *booted_digest;  /* 12-character digest of the booted image */
-	gchar *booted_version; /* Version string reported by bootc for the booted image *
+	gchar *booted_version; /* Version string reported by bootc for the booted image */
 	gboolean is_composefs; /* True if using the pure ComposeFS backend */
 };
 
