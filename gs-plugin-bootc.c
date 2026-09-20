@@ -198,7 +198,7 @@ parse_bootc_status_json (GsPluginBootc *self, const gchar *json_data)
 	if (has_staged) {
 		gs_app_set_state (self->os_app, GS_APP_STATE_PENDING_INSTALL);
 		gs_app_add_quirk (self->os_app, GS_APP_QUIRK_NEEDS_REBOOT);
-		gs_app_set_size_download (task_data->app, GS_SIZE_TYPE_VALID, 0);
+		gs_app_set_size_download (self->os_app, GS_SIZE_TYPE_VALID, 0);
 		g_autofree gchar *staged_version = NULL;
 		if (JSON_NODE_HOLDS_OBJECT (staged_node))
 			staged_version = get_entry_version (json_node_get_object (staged_node));
