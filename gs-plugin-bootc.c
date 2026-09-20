@@ -202,7 +202,7 @@ parse_bootc_status_json (GsPluginBootc *self, const gchar *json_data)
 		g_autofree gchar *staged_version = NULL;
 		if (JSON_NODE_HOLDS_OBJECT (staged_node))
 			staged_version = get_entry_version (json_node_get_object (staged_node));
-			gs_app_set_update_version (self->os_app, staged_version ? staged_version : "latest");
+		gs_app_set_update_version (self->os_app, staged_version ? staged_version : "latest");
 	} else if (self->update_available) {
 		gs_app_set_state (self->os_app, GS_APP_STATE_UPDATABLE);
 		gs_app_remove_quirk (self->os_app, GS_APP_QUIRK_NEEDS_REBOOT);
