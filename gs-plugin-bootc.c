@@ -110,13 +110,17 @@ static void
 ensure_os_app_created (GsPluginBootc *self)
 {
 	if (self->os_app != NULL) return;
-
+	const gchar * const *langs = g_get_language_names ();
 	self->os_app = gs_app_new (BOOTC_OS_APP_ID);
 	gs_app_set_kind (self->os_app, AS_COMPONENT_KIND_OPERATING_SYSTEM);
 	gs_app_set_scope (self->os_app, AS_COMPONENT_SCOPE_SYSTEM);
 	gs_app_set_name (self->os_app, GS_APP_QUALITY_NORMAL, self->os_name);
-	gs_app_set_summary (self->os_app, GS_APP_QUALITY_NORMAL, "System Update");
-	gs_app_set_description (self->os_app, GS_APP_QUALITY_NORMAL, "Container-native atomic host update.");
+	gs_app_set_summary (self->os_app, GS_APP_QUALITY_NORMAL,
+	                    use_pt ? "Atualização do sistema" : "System Update")
+	gboolean use_pt = g_str_has_prefix (langs[0], "pt");
+	gs_app_set_description (self->os_app, GS_APP_QUALITY_NORMAL,
+	                        use_pt ? "Atualização atômica do sistema nativa de contêineres."
+	                               : "Container-native atomic host update.");
 	
 	/* Use the image digest as the version to prevent "unknown" state in UI */
 	gs_app_set_version (self->os_app, self->booted_version ? self->booted_version : "unknown");
