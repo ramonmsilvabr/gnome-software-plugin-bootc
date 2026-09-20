@@ -118,7 +118,7 @@ ensure_os_app_created (GsPluginBootc *self)
 	gs_app_set_name (self->os_app, GS_APP_QUALITY_NORMAL, self->os_name);
 	
 	gs_app_set_summary (self->os_app, GS_APP_QUALITY_NORMAL,
-	                    use_pt ? "Atualização do sistema" : "System Update")
+	                    use_pt ? "Atualização do sistema" : "System Update");
 	
 	gs_app_set_description (self->os_app, GS_APP_QUALITY_NORMAL,
 	                        use_pt ? "Atualização atômica do sistema nativa de contêineres."
