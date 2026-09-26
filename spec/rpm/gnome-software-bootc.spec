@@ -26,7 +26,7 @@ This package provides a GNOME Software plugin that enables system updates
 and background update checks for systems running bootc (bootable containers).
 
 %prep
-%autosetup -n gnome-software-plugin-bootc-main
+%autosetup -n %{name}-%{version}
 
 %build
 %meson
