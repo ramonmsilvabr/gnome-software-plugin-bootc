@@ -27,21 +27,24 @@ jobs:
 
       - name: Build RPM Package
         run: |
-          # Create RPM build directories
-          mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+         mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 
-          # Copy the spec file from build/rpm/ into the SPECS directory
-          cp spec/rpm/*.spec ~/rpmbuild/SPECS/
+          # 1. Copy spec file to SPECS
+          cp build/rpm/*.spec ~/rpmbuild/SPECS/
 
-          # Create a source tarball from the checked-out repository
-          TARBALL_NAME="gnome-software-plugin-bootc-0.1.0.tar.gz"
-          tar --transform 's/^\./gnome-software-plugin-bootc-main/' \
+          # 2. Extract the Name and Version directly from the .spec file
+          SPEC_FILE=$(ls ~/rpmbuild/SPECS/*.spec | head -n 1)
+          NAME=$(rpmspec -q --qf "%{name}\n" "$SPEC_FILE" | head -n 1)
+          VERSION=$(rpmspec -q --qf "%{version}\n" "$SPEC_FILE" | head -n 1)
+          TARBALL_NAME="${NAME}-${VERSION}.tar.gz"
+
+          # 3. Create the source archive expected by rpmbuild
+          tar --transform "s/^\./${NAME}-${VERSION}/" \
               --exclude='.git' \
               -czf ~/rpmbuild/SOURCES/${TARBALL_NAME} .
 
-          # Run rpmbuild pointing to the copied spec file
-          rpmbuild -ba ~/rpmbuild/SPECS/*.spec
-
+          # 4. Run rpmbuild
+          rpmbuild -ba "$SPEC_FILE"
       - name: Upload RPM Artifact
         uses: actions/upload-artifact@v4
         with:
