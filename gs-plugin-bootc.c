@@ -136,6 +136,8 @@ ensure_os_app_created (GsPluginBootc *self)
 	gs_app_set_allow_cancel (self->os_app, TRUE);
 	gs_app_set_state (self->os_app, GS_APP_STATE_INSTALLED);
 	gs_app_set_management_plugin (self->os_app, GS_PLUGIN (self));
+	gs_app_set_metadata (self->os_app, "GnomeSoftware::PackagingFormat", "ostree");
+	gs_app_set_metadata (self->os_app, "GnomeSoftware::PackagingIcon", "system-software-install-symbolic");
 }
 
 static gchar *
@@ -245,6 +247,9 @@ gs_plugin_bootc_setup_async (GsPlugin            *plugin,
 	g_autoptr(GError) error = NULL;
 
 	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_RUN_AFTER, "appstream");
+	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_CONFLICTS, "packagekit");
+	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_CONFLICTS, "dnf");
+	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_CONFLICTS, "rpm-ostree");
 
 	if (!g_file_test (BOOTC_CLI_PATH, G_FILE_TEST_EXISTS)) {
 		gs_plugin_set_enabled (plugin, FALSE);
