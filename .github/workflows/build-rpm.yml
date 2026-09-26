@@ -27,18 +27,15 @@ jobs:
 
       - name: Build RPM Package
         run: |
-         mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
+          mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
 
-          # 1. Copy spec file to SPECS
-          cp build/rpm/*.spec ~/rpmbuild/SPECS/
+          cp spec/rpm/*.spec ~/rpmbuild/SPECS/
 
-          # 2. Extract the Name and Version directly from the .spec file
           SPEC_FILE=$(ls ~/rpmbuild/SPECS/*.spec | head -n 1)
           NAME=$(rpmspec -q --qf "%{name}\n" "$SPEC_FILE" | head -n 1)
           VERSION=$(rpmspec -q --qf "%{version}\n" "$SPEC_FILE" | head -n 1)
           TARBALL_NAME="${NAME}-${VERSION}.tar.gz"
 
-          # 3. Create the source archive expected by rpmbuild
           tar --transform "s/^\./${NAME}-${VERSION}/" \
               --exclude='.git' \
               -czf ~/rpmbuild/SOURCES/${TARBALL_NAME} .
