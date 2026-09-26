@@ -29,7 +29,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-          cp build/rpm/*.spec ~/rpmbuild/SPECS/
+          cp spec/rpm/*.spec ~/rpmbuild/SPECS/
           SPEC_FILE=$(find ~/rpmbuild/SPECS -name '*.spec' -print -quit)
           NAME=$(rpmspec -q --qf '%{name}\n' "$SPEC_FILE" | head -n1)
           VERSION=$(rpmspec -q --qf '%{version}\n' "$SPEC_FILE" | head -n1)
