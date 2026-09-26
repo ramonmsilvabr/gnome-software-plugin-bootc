@@ -6,6 +6,10 @@ on:
       - '*'
   workflow_dispatch:
 
+
+permissions:
+  contents: write
+
 jobs:
   build-rpm:
     runs-on: ubuntu-26.04
@@ -56,18 +60,26 @@ jobs:
 
   release:
     needs: build-rpm
-    runs-on: ubuntu-26.04
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     steps:
-    - name: Download Artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: gnome-software-bootc
-        path: ./rpms
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: gnome-software-bootc
+          path: ./rpms
 
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ./rpms/*.rpm
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Inspect downloaded files
+        run: |
+          echo "Downloaded files:"
+          find ./rpms -type f -print
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./rpms/**/*.rpm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
