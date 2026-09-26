@@ -1,11 +1,6 @@
-Here is the complete RPM .spec file tailored specifically for gnome-software-plugin-bootc. It compiles the C plugin using Meson/Ninja, installs the shared library alongside the custom Polkit policies, Polkit rules, and helper executable, and properly populates all metadata and package dependencies.
-
-Save this file as gnome-software-plugin-bootc.spec:
-RPM spec files
-
 Name:           gnome-software-bootc
 Version:        0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GNOME Software plugin for bootc updates and system management
 
 License:        GPL-2.0-or-later
