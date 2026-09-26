@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-rpm:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     container:
       image: quay.io/fedora/fedora:latest
 
@@ -51,22 +51,23 @@ jobs:
       - name: Upload RPM Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gnome-software-bootc-rpm
+          name: gnome-software-bootc
           path: ~/rpmbuild/RPMS/*/*.rpm
 
   release:
     needs: build-rpm
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: gnome-software-bootc
-          path: ./rpms
+    runs-on: ubuntu-26.04
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ./rpms/*.rpm
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: gnome-software-bootc
+        path: ./rpms
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./rpms/*.rpm
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
