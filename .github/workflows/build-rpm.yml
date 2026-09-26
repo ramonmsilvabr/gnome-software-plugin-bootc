@@ -27,20 +27,25 @@ jobs:
 
       - name: Build RPM Package
         run: |
+          set -euo pipefail
           mkdir -p ~/rpmbuild/{BUILD,BUILDROOT,RPMS,SOURCES,SPECS,SRPMS}
-
-          cp spec/rpm/*.spec ~/rpmbuild/SPECS/
-
-          SPEC_FILE=$(ls ~/rpmbuild/SPECS/*.spec | head -n 1)
-          NAME=$(rpmspec -q --qf "%{name}\n" "$SPEC_FILE" | head -n 1)
-          VERSION=$(rpmspec -q --qf "%{version}\n" "$SPEC_FILE" | head -n 1)
+          cp build/rpm/*.spec ~/rpmbuild/SPECS/
+          SPEC_FILE=$(find ~/rpmbuild/SPECS -name '*.spec' -print -quit)
+          NAME=$(rpmspec -q --qf '%{name}\n' "$SPEC_FILE" | head -n1)
+          VERSION=$(rpmspec -q --qf '%{version}\n' "$SPEC_FILE" | head -n1)
           TARBALL_NAME="${NAME}-${VERSION}.tar.gz"
-          git clone https://github.com/ramonmsilvabr/gnome-software-plugin-bootc.git /tmp/source-code
-          tar -czf ~/rpmbuild/SOURCES/${TARBALL_NAME} \
-              --transform "s/^\./${NAME}-${VERSION}/" \
-              --exclude='.git' \
-              -C /tmp/source-code .
-
+          echo "Package: ${NAME}"
+          echo "Version: ${VERSION}"
+          echo "Source: ${TARBALL_NAME}"
+          git clone --depth=1 \
+            https://github.com/ramonmsilvabr/gnome-software-plugin-bootc.git \
+            /tmp/source-code
+          mkdir -p "/tmp/${NAME}-${VERSION}"
+          cp -a /tmp/source-code/. "/tmp/${NAME}-${VERSION}/"
+          rm -rf "/tmp/${NAME}-${VERSION}/.git"
+          tar -C /tmp \
+            -czf "${HOME}/rpmbuild/SOURCES/${TARBALL_NAME}" \
+            "${NAME}-${VERSION}"
           rpmbuild -ba "$SPEC_FILE"
 
       - name: Upload RPM Artifact
