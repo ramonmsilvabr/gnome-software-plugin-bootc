@@ -35,13 +35,14 @@ jobs:
           NAME=$(rpmspec -q --qf "%{name}\n" "$SPEC_FILE" | head -n 1)
           VERSION=$(rpmspec -q --qf "%{version}\n" "$SPEC_FILE" | head -n 1)
           TARBALL_NAME="${NAME}-${VERSION}.tar.gz"
-
-          tar --transform "s/^\./${NAME}-${VERSION}/" \
+          git clone https://github.com/ramonmsilvabr/gnome-software-plugin-bootc.git /tmp/source-code
+          tar -czf ~/rpmbuild/SOURCES/${TARBALL_NAME} \
+              --transform "s/^\./${NAME}-${VERSION}/" \
               --exclude='.git' \
-              -czf ~/rpmbuild/SOURCES/${TARBALL_NAME} .
+              -C /tmp/source-code .
 
-          # 4. Run rpmbuild
           rpmbuild -ba "$SPEC_FILE"
+
       - name: Upload RPM Artifact
         uses: actions/upload-artifact@v4
         with:
