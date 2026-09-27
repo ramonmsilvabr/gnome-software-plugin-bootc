@@ -248,7 +248,7 @@ gs_plugin_bootc_setup_async (GsPlugin            *plugin,
 
 	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_RUN_AFTER, "appstream");
 	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_CONFLICTS, "packagekit");
-	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_CONFLICTS, "dnf");
+	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_CONFLICTS, "dnf5");
 	gs_plugin_add_rule (plugin, GS_PLUGIN_RULE_CONFLICTS, "rpm-ostree");
 
 	if (!g_file_test (BOOTC_CLI_PATH, G_FILE_TEST_EXISTS)) {
