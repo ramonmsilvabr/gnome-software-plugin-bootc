@@ -1,6 +1,6 @@
 Name:           gnome-software-bootc
-Version:        0.1.3
-Release:        1%{?dist}
+Version:        0.1.4
+Release:        2%{?dist}
 Summary:        GNOME Software plugin for bootc updates and system management
 
 License:        GPL-2.0-or-later
@@ -62,8 +62,10 @@ install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/po
 %{_datadir}/polkit-1/actions/org.containers.bootc.policy
 
 %changelog
-* Sat Sep 26 2026 Developer <dev@example.com> - 0.1-1
+* Sat Sep 26 2026 ramonmsilvabr - 0.1-1
 - Initial RPM release with bootc helper script and Polkit rules
 * Sat Sep 26 2026 ramonmsilvabr - 0.1.3-1
 - Add plugin backend conflicts
 - Add ostree packaging format at metadata
+* Sat Sep 26 2026 ramonmsilvabr - 0.1.4-2
+- Fix plugin backend from "dnf" to "dnf5"
