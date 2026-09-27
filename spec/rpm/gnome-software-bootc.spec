@@ -67,5 +67,5 @@ install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/po
 * Sat Sep 26 2026 ramonmsilvabr - 0.1.3-1
 - Add plugin backend conflicts
 - Add ostree packaging format at metadata
-* Sat Sep 26 2026 ramonmsilvabr - 0.1.4-2
+* Sat Sep 26 2026 ramonmsilvabr - 0.1.4-3
 - Fix plugin backend from "dnf" to "dnf5"
