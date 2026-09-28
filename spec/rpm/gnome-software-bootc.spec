@@ -1,6 +1,6 @@
 Name:           gnome-software-bootc
 Version:        0.1.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GNOME Software plugin for bootc updates and system management
 
 License:        GPL-2.0-or-later
@@ -69,3 +69,5 @@ install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/po
 - Add ostree packaging format at metadata
 * Sat Sep 26 2026 ramonmsilvabr - 0.1.4-3
 - Fix plugin backend from "dnf" to "dnf5"
+* Sun Sep 27 2026 ramonmsilvabr - 0.1.5-2
+- App only appears for System Updates
