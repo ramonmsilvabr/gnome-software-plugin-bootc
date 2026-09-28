@@ -335,24 +335,23 @@ gs_plugin_bootc_list_apps_async (GsPlugin *plugin, GsAppQuery *query, GsPluginLi
 	g_autoptr(GsAppList) app_list = gs_app_list_new ();
 
 	ensure_os_app_created (self);
-	gboolean should_add = TRUE;
+	gboolean should_add = FALSE;
 
 	if (query != NULL) {
+		GsCategory *category = gs_app_query_get_category (query);
+		const gchar * const *keywords = gs_app_query_get_keywords (query);
 		GsAppQueryTristate is_for_update = gs_app_query_get_is_for_update (query);
 		GsAppQueryTristate is_installed = gs_app_query_get_is_installed (query);
 		GsAppState state = gs_app_get_state (self->os_app);
 
-		if (is_for_update == GS_APP_QUERY_TRISTATE_TRUE) {
-			if (state != GS_APP_STATE_UPDATABLE &&
-			    state != GS_APP_STATE_UPDATABLE_LIVE &&
-			    state != GS_APP_STATE_PENDING_INSTALL) {
-				should_add = FALSE;
-			}
-		}
-		if (is_installed == GS_APP_QUERY_TRISTATE_TRUE) {
-			if (state == GS_APP_STATE_UNKNOWN) {
-				should_add = FALSE;
-			}
+		if (category != NULL || keywords != NULL) {
+			should_add = FALSE;
+		} else if (is_for_update == GS_APP_QUERY_TRISTATE_TRUE) {
+			should_add = (state == GS_APP_STATE_UPDATABLE ||
+			              state == GS_APP_STATE_UPDATABLE_LIVE ||
+			              state == GS_APP_STATE_PENDING_INSTALL);
+		} else if (is_installed == GS_APP_QUERY_TRISTATE_TRUE) {
+			should_add = (state != GS_APP_STATE_UNKNOWN);
 		}
 	}
 
