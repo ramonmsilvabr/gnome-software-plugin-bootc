@@ -1,6 +1,6 @@
 Name:           gnome-software-bootc
 Version:        0.1.5
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        GNOME Software plugin for bootc updates and system management
 
 License:        GPL-2.0-or-later
@@ -46,6 +46,7 @@ install -m 0644 sys-utils/99-bootc-check.rules %{buildroot}%{_datadir}/polkit-1/
 # 3. Install Polkit policy action
 install -d -m 0755 %{buildroot}%{_datadir}/polkit-1/actions
 install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/polkit-1/actions/org.containers.bootc.policy
+          if git ls-remote --exit-code --heads "$REMOTE" gh-pages >/dev/null 2>&1; then
 
 %files
 %license LICENSE
@@ -71,3 +72,5 @@ install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/po
 - Fix plugin backend from "dnf" to "dnf5"
 * Sun Sep 27 2026 ramonmsilvabr - 0.1.5-2
 - App only appears for System Updates
+* Sun Oct 2 2026 ramonmsilvabr - 0.1.5-3
+- App is now a experimental repo

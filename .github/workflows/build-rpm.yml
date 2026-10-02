@@ -1,4 +1,4 @@
-name: Build and Release RPM
+name: Build and Publish RPM Repo
 
 on:
   push:
@@ -6,15 +6,18 @@ on:
       - '*'
   workflow_dispatch:
 
-
 permissions:
   contents: write
 
 jobs:
   build-rpm:
     runs-on: ubuntu-26.04
+    strategy:
+      fail-fast: false
+      matrix:
+        fedora: [43, 44, 45]   # adicione 45, etc. quando quiser
     container:
-      image: quay.io/fedora/fedora:44
+      image: quay.io/fedora/fedora:${{ matrix.fedora }}
 
     steps:
       - name: Checkout Source
@@ -55,31 +58,68 @@ jobs:
       - name: Upload RPM Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: gnome-software-bootc
+          name: rpm-${{ matrix.fedora }}
           path: ~/rpmbuild/RPMS/*/*.rpm
 
-  release:
+  publish-repo:
     needs: build-rpm
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: write
+    concurrency:
+      group: publish-rpm-repo
+      cancel-in-progress: false
+    container:
+      image: quay.io/fedora/fedora:latest
 
     steps:
-      - name: Download Artifacts
+      - name: Install repo tools
+        run: dnf install -y git createrepo_c
+
+      - name: Download all RPM artifacts
         uses: actions/download-artifact@v4
         with:
-          name: gnome-software-bootc
+          pattern: rpm-*
           path: ./rpms
 
-      - name: Inspect downloaded files
-        run: |
-          echo "Downloaded files:"
-          find ./rpms -type f -print
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ./rpms/**/*.rpm
+      - name: Update repository on gh-pages
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REMOTE: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
+          REPO_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+        run: |
+          set -euo pipefail
+          git config --global --add safe.directory '*'
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git ls-remote --exit-code --heads "$REMOTE" gh-pages >/dev/null 2>&1; then
+            git clone --branch gh-pages --depth=1 "$REMOTE" site
+          else
+            git init site
+            git -C site checkout --orphan gh-pages
+            git -C site remote add origin "$REMOTE"
+          fi
+
+          # Um diretório por versão do Fedora
+          for dir in rpms/rpm-*; do
+            ver="${dir##*rpm-}"
+            dest="site/fedora/${ver}/x86_64"
+            mkdir -p "$dest"
+            find "$dir" -name '*.rpm' -exec cp -v {} "$dest/" \;
+            createrepo_c --update "$dest"
+          done
+
+          cat > site/gnome-software-bootc.repo <<EOF
+          [gnome-software-bootc]
+          name=GNOME Software bootc plugin
+          baseurl=${REPO_URL}/fedora/\$releasever/\$basearch/
+          enabled=1
+          gpgcheck=0
+          repo_gpgcheck=0
+          EOF
+          sed -i 's/^          //' site/gnome-software-bootc.repo
+
+          touch site/.nojekyll
+
+          cd site
+          git add -A
+          git commit -m "Update RPM repo (${GITHUB_REF_NAME:-manual})" || echo "Nada para commitar"
+          git push origin gh-pages
