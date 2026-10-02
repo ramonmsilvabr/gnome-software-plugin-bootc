@@ -46,7 +46,6 @@ install -m 0644 sys-utils/99-bootc-check.rules %{buildroot}%{_datadir}/polkit-1/
 # 3. Install Polkit policy action
 install -d -m 0755 %{buildroot}%{_datadir}/polkit-1/actions
 install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/polkit-1/actions/org.containers.bootc.policy
-          if git ls-remote --exit-code --heads "$REMOTE" gh-pages >/dev/null 2>&1; then
 
 %files
 %license LICENSE
