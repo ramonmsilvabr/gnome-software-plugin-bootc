@@ -1,0 +1,6 @@
+[gnome-software-bootc]
+name=GNOME Software bootc plugin
+baseurl=https://ramonmsilvabr.github.io/gnome-software-plugin-bootc/fedora/$releasever/$basearch/
+enabled=1
+gpgcheck=0
+repo_gpgcheck=0
