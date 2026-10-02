@@ -1,6 +1,6 @@
 Name:           gnome-software-bootc
-Version:        0.1.5
-Release:        3%{?dist}
+Version:        0.1.6
+Release:        1%{?dist}
 Summary:        GNOME Software plugin for bootc updates and system management
 
 License:        GPL-2.0-or-later
@@ -73,3 +73,5 @@ install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/po
 - App only appears for System Updates
 * Sun Oct 2 2026 ramonmsilvabr - 0.1.5-3
 - App is now a experimental repo
+* Sun Oct 2 2026 ramonmsilvabr - 0.1.6-1
+- Corrije spec
