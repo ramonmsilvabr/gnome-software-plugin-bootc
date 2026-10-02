@@ -1,5 +1,5 @@
 Name:           gnome-software-bootc
-Version:        0.1.6
+Version:        0.1.7
 Release:        1%{?dist}
 Summary:        GNOME Software plugin for bootc updates and system management
 
@@ -47,6 +47,10 @@ install -m 0644 sys-utils/99-bootc-check.rules %{buildroot}%{_datadir}/polkit-1/
 install -d -m 0755 %{buildroot}%{_datadir}/polkit-1/actions
 install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/polkit-1/actions/org.containers.bootc.policy
 
+rm -f %{buildroot}%{_libdir}/gnome-software/plugins-*/libgs_plugin_dnf5.so \
+      %{buildroot}%{_libdir}/gnome-software/plugins-*/libgs_plugin_packagekit.so \
+      %{buildroot}%{_libdir}/gnome-software/plugins-*/libgs_plugin_dkms.so
+
 %files
 %license LICENSE
 %doc README.md
@@ -74,4 +78,6 @@ install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/po
 * Sun Oct 2 2026 ramonmsilvabr - 0.1.5-3
 - App is now a experimental repo
 * Sun Oct 2 2026 ramonmsilvabr - 0.1.6-1
-- Corrije spec
+- Fix spec
+* Sun Oct 2 2026 ramonmsilvabr - 0.1.7-1
+- Added removal of dnf, packagekit and dkms plugins 
