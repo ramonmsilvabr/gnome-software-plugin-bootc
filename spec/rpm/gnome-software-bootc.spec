@@ -1,6 +1,6 @@
 Name:           gnome-software-bootc
 Version:        0.1.7
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        GNOME Software plugin for bootc updates and system management
 
 License:        GPL-2.0-or-later
