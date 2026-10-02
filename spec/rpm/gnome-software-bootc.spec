@@ -47,10 +47,6 @@ install -m 0644 sys-utils/99-bootc-check.rules %{buildroot}%{_datadir}/polkit-1/
 install -d -m 0755 %{buildroot}%{_datadir}/polkit-1/actions
 install -m 0644 sys-utils/org.containers.bootc.policy %{buildroot}%{_datadir}/polkit-1/actions/org.containers.bootc.policy
 
-rm -f %{buildroot}%{_libdir}/gnome-software/plugins-*/libgs_plugin_dnf5.so \
-      %{buildroot}%{_libdir}/gnome-software/plugins-*/libgs_plugin_packagekit.so \
-      %{buildroot}%{_libdir}/gnome-software/plugins-*/libgs_plugin_dkms.so
-
 %files
 %license LICENSE
 %doc README.md
@@ -64,6 +60,18 @@ rm -f %{buildroot}%{_libdir}/gnome-software/plugins-*/libgs_plugin_dnf5.so \
 # Polkit security files
 %{_datadir}/polkit-1/rules.d/99-bootc-check.rules
 %{_datadir}/polkit-1/actions/org.containers.bootc.policy
+
+%post
+# Executado logo após a instalação do seu pacote no sistema do cliente
+rm -f %{_libdir}/gnome-software/plugins-*/libgs_plugin_dnf5.so \
+      %{_libdir}/gnome-software/plugins-*/libgs_plugin_packagekit.so \
+      %{_libdir}/gnome-software/plugins-*/libgs_plugin_dkms.so || :
+
+%posttrans
+# Garantia extra: executa após todas as transações (útil se o gnome-software for atualizado na mesma transação)
+rm -f %{_libdir}/gnome-software/plugins-*/libgs_plugin_dnf5.so \
+      %{_libdir}/gnome-software/plugins-*/libgs_plugin_packagekit.so \
+      %{_libdir}/gnome-software/plugins-*/libgs_plugin_dkms.so || :
 
 %changelog
 * Sat Sep 26 2026 ramonmsilvabr - 0.1-1
